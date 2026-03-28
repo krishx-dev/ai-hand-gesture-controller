@@ -1,0 +1,431 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-900: #0f172a;
+  --color-slate-800: #1e293b;
+  --color-slate-700: #334155;
+  --color-blue-500: #3b82f6;
+  --color-blue-400: #60a5fa;
+  --color-blue-900: #1e3a8a;
+}
+
+:root {
+  /* Skeuomorphic Glassmorphism Palette */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-light: rgba(255, 255, 255, 0.15); /* Top-left lighting highlight */
+  --glass-border-dark: rgba(0, 0, 0, 0.6);        /* Bottom-right physical shadow */
+  
+  /* Deep Layered Shadows for Tactical Panels */
+  --panel-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.45), 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.3);
+
+  /* Tactical Button Shadows */
+  --btn-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+
+  --btn-shadow-active: 
+    inset 0 2px 8px rgba(0, 0, 0, 0.6), 
+    inset 0 1px 2px rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+
+  --radius-panel: 20px;
+  --radius-btn: 12px;
+  
+  --text-hi: #f1f5f9;
+  --text-med: #cbd5e1;
+  --text-lo: #64748b;
+  
+  --trans-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --trans-snappy: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+  background-color: #05070a;
+  color: var(--text-hi);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── 1. True Glassmorphism Background (Gradient + Glow) ── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 15% 50%, rgba(20, 45, 100, 0.25), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(15, 60, 80, 0.2), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(30, 20, 60, 0.2), transparent 50%),
+    linear-gradient(135deg, #090e17 0%, #030406 100%);
+  overflow: hidden;
+}
+
+/* Add a subtle physical noise texture overlay to enhance the physical feel */
+.ambient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── 2. The Core Skeuomorphic Panel ── */
+.glass-panel {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-panel);
+  /* Top-left lighting + bottom-right shadow border technique */
+  border-top: 1px solid var(--glass-border-light);
+  border-left: 1px solid var(--glass-border-light);
+  border-right: 1px solid var(--glass-border-dark);
+  border-bottom: 1px solid var(--glass-border-dark);
+  box-shadow: var(--panel-shadow);
+  transition: var(--trans-smooth);
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Floating Card Hover Effect (Slight lift) */
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.55), 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
+}
+
+/* Perfect Alignment Header Utility */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--glass-border-light);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Centralized Body Padding Utility */
+.panel-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 3. Internal Inset Wells (For data areas/readouts) ── */
+.inset-well {
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 16px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(0,0,0,0.8);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: var(--trans-smooth);
+}
+
+/* ── 4. Tactile Skeuomorphic Buttons ── */
+.btn-skeuo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, rgba(40,50,70,0.6) 0%, rgba(20,25,35,0.8) 100%);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-btn);
+  border: 1px solid rgba(0,0,0,0.3);
+  box-shadow: var(--btn-shadow);
+  color: var(--text-hi);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--trans-snappy);
+  user-select: none;
+  overflow: hidden;
+}
+
+/* Inner Top Light */
+.btn-skeuo::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  opacity: 0.8;
+  transition: var(--trans-snappy);
+}
+
+.btn-skeuo:hover {
+  transform: scale(1.02);
+  background: linear-gradient(180deg, rgba(50,65,90,0.7) 0%, rgba(25,35,50,0.9) 100%);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.3), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+.btn-skeuo:hover::before { opacity: 1; height: 2px; }
+
+.btn-skeuo:active {
+  transform: scale(0.97) translateY(2px);
+  background: rgba(10, 15, 25, 0.8);
+  box-shadow: var(--btn-shadow-active);
+  color: var(--text-med);
+}
+.btn-skeuo:active::before { opacity: 0; }
+
+/* ── 5. Blue Variant Tactile Button ── */
+.btn-skeuo-blue {
+  background: linear-gradient(180deg, rgba(59,130,246,0.3) 0%, rgba(29,78,216,0.5) 100%);
+  border-color: rgba(30,58,138,0.5);
+  box-shadow: 
+    0 4px 12px rgba(37,99,235,0.2), 
+    inset 0 1px 1px rgba(147,197,253,0.3),
+    inset 0 -2px 4px rgba(30,58,138,0.6);
+  color: #eff6ff;
+}
+.btn-skeuo-blue::before { background: linear-gradient(90deg, transparent, rgba(147,197,253,0.6), transparent); }
+.btn-skeuo-blue:hover {
+  background: linear-gradient(180deg, rgba(59,130,246,0.4) 0%, rgba(29,78,216,0.6) 100%);
+  box-shadow: 
+    0 6px 16px rgba(37,99,235,0.3), 
+    inset 0 1px 2px rgba(147,197,253,0.5),
+    inset 0 -2px 4px rgba(30,58,138,0.6);
+}
+.btn-skeuo-blue:active {
+  background: rgba(30,58,138,0.7);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── 6. Red Variant Tactile Button ── */
+.btn-skeuo-red {
+  background: linear-gradient(180deg, rgba(239,68,68,0.25) 0%, rgba(185,28,28,0.45) 100%);
+  border-color: rgba(153,27,27,0.5);
+  box-shadow: 
+    0 4px 12px rgba(220,38,38,0.2), 
+    inset 0 1px 1px rgba(252,165,165,0.3),
+    inset 0 -2px 4px rgba(153,27,27,0.6);
+  color: #fef2f2;
+}
+.btn-skeuo-red::before { background: linear-gradient(90deg, transparent, rgba(252,165,165,0.6), transparent); }
+.btn-skeuo-red:hover {
+  background: linear-gradient(180deg, rgba(239,68,68,0.35) 0%, rgba(185,28,28,0.55) 100%);
+  box-shadow: 
+    0 6px 16px rgba(220,38,38,0.3), 
+    inset 0 1px 2px rgba(252,165,165,0.5),
+    inset 0 -2px 4px rgba(153,27,27,0.6);
+}
+.btn-skeuo-red:active {
+  background: rgba(153,27,27,0.7);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* ── 7. Micro-interactions & Animations ── */
+.anim-popin { animation: popin 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.anim-fadeup { animation: fadeup 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; opacity: 0; transform: translateY(15px); }
+
+@keyframes popin { from { opacity: 0; transform: scale(0.9) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes fadeup { to { opacity: 1; transform: translateY(0); } }
+
+.pulse { animation: pulseAnim 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+@keyframes pulseAnim { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+/* Scrollbar overlay */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Utility classes for visual hierarchy */
+.text-label { opacity: 0.6; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+.text-value { font-weight: 800; color: var(--text-hi); }
+
+/* ── 8. Status Badges & Dots ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* ── 9. Icon Badge (camera / gesture icons in card headers) ── */
+.icon-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--trans-smooth);
+}
+
+/* ── 10. HUD Corner Brackets (webcam overlay) ── */
+.cc {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgba(255, 255, 255, 0.45);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.cc-tl { top: 10px; left: 10px; border-top-width: 2px; border-left-width: 2px; border-radius: 3px 0 0 0; }
+.cc-tr { top: 10px; right: 10px; border-top-width: 2px; border-right-width: 2px; border-radius: 0 3px 0 0; }
+.cc-bl { bottom: 10px; left: 10px; border-bottom-width: 2px; border-left-width: 2px; border-radius: 0 0 0 3px; }
+.cc-br { bottom: 10px; right: 10px; border-bottom-width: 2px; border-right-width: 2px; border-radius: 0 0 3px 0; }
+
+/* ── 11. Progress Track & Fill ── */
+.prog-track {
+  position: relative;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+/* ── 12. Missing Keyframe Animations ── */
+@keyframes blinkAnim {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.anim-blink { animation: blinkAnim 1.1s step-end infinite; }
+
+@keyframes spinAnim {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.anim-spin { animation: spinAnim 0.75s linear infinite; }
+
+@keyframes waveAnim {
+  0%, 100% { transform: scaleY(0.55); }
+  50%       { transform: scaleY(1.05); }
+}
+.anim-wave {
+  animation: waveAnim 0.85s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+@keyframes slidein {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.anim-slidein { animation: slidein 0.28s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
+
+/* ── 13. Range Slider ── */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.4), rgba(30, 58, 138, 0.25));
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+  cursor: pointer;
+  box-shadow:
+    0 2px 8px rgba(37, 99, 235, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    0 0 0 2px rgba(30, 58, 138, 0.4);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow:
+    0 4px 14px rgba(37, 99, 235, 0.7),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.55);
+}
+
+/* ── 14. Toggle Switch ── */
+.tog {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  flex-shrink: 0;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 0;
+}
+.tog::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, 0.85);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transition: left 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.tog.on {
+  background: rgba(37, 99, 235, 0.35);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+.tog.on::after {
+  left: calc(100% - 19px);
+  background: #60a5fa;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 8px rgba(96, 165, 250, 0.5);
+}
+
