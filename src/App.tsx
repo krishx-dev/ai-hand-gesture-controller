@@ -81,7 +81,8 @@ export function App() {
   const handleGestureDetected = useCallback((
     gesture: GestureType,
     conf:    number,
-    _lms:    Landmark[]
+    _lms:    Landmark[],
+    latency: number
   ) => {
     frameCountRef.current += 1;
     const fps = fpsCounter.current.tick();
@@ -97,13 +98,16 @@ export function App() {
     setCurrentGesture(gesture);
     setCurrentAction(action);
     setConfidence(conf);
-    setConfidenceHistory(h => [...h.slice(-59), conf]);
+    setConfidenceHistory(h => {
+      const next = [...h, conf];
+      return next.length > 60 ? next.slice(1) : next;
+    });
 
     if (gesture !== 'none' && now - lastGestureTime.current > s.gestureDelay) {
       lastGestureTime.current = now;
       const info = GESTURE_CATALOG.find(g => g.id === gesture);
       const entry: GestureHistoryEntry = {
-        id:         `${now}-${Math.random()}`,
+        id:         crypto.randomUUID ? crypto.randomUUID() : `${now}-${Math.random()}`,
         gesture, action,
         name:       info?.name  ?? gesture,
         emoji:      info?.emoji ?? '?',
@@ -111,30 +115,37 @@ export function App() {
         timestamp:  new Date(),
         color:      info?.color ?? '#5b8dee',
       };
-      setGestureHistory(h => [...h.slice(-99), entry]);
+      setGestureHistory(h => {
+        const next = [...h, entry];
+        return next.length > 100 ? next.slice(1) : next;
+      });
+      
       setUsageData(prev => {
         const key  = info?.name ?? gesture;
-        const item = prev.find(d => d.name === key);
-        if (item) return prev.map(d => d.name === key ? { ...d, count: d.count + 1 } : d);
+        const index = prev.findIndex(d => d.name === key);
+        if (index !== -1) {
+          const next = [...prev];
+          next[index] = { ...next[index], count: next[index].count + 1 };
+          return next;
+        }
         return [...prev, { name: key, count: 1, color: info?.color ?? '#5b8dee', emoji: info?.emoji ?? '?' }];
       });
-
     }
 
-    const latency = Math.round(8 + Math.random() * 16);
-    const cpu     = Math.round(18 + Math.random() * 22);
+    // Performance metrics
     setMetrics(m => ({
       fps:           fps || m.fps,
       latency,
-      cpuUsage:      cpu,
+      cpuUsage:      0, // Real CPU usage is not available in browser
       accuracy:      gesture !== 'none' ? conf : m.accuracy,
       uptime:        m.uptime + 1,
       totalGestures: m.totalGestures + (gesture !== 'none' ? 1 : 0),
     }));
-    setFpsHistory(h => [
-      ...h.slice(-39),
-      { t: `${frameCountRef.current}`, fps: fps || 0, lat: latency },
-    ]);
+
+    setFpsHistory(h => {
+      const next = [...h, { t: `${frameCountRef.current}`, fps: fps || 0, lat: latency }];
+      return next.length > 40 ? next.slice(1) : next;
+    });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSettingsChange = useCallback((key: keyof Settings, val: number | boolean) => {

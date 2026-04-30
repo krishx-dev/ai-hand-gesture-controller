@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Cpu, Clock, Target } from 'lucide-react';
+import { Activity, Clock, Target } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import type { SystemMetrics } from '../types';
 
@@ -50,7 +50,6 @@ const Row: React.FC<RowProps> = ({ icon, label, value, unit, color, pct, offline
 
 export const MetricsCard: React.FC<Props> = ({ metrics, fpsHistory, cameraConnected }) => {
   const fpsP = Math.min(100, (metrics.fps / 60) * 100);
-  const cpuP = metrics.cpuUsage;
   const latP = Math.min(100, 100 - (metrics.latency / 100) * 100);
   const accP = metrics.accuracy * 100;
 
@@ -130,7 +129,7 @@ export const MetricsCard: React.FC<Props> = ({ metrics, fpsHistory, cameraConnec
         {/* 2×2 metric grid */}
         <div className="grid grid-cols-2 gap-3 mt-auto mb-2">
           <Row icon={<Activity size={14}/>} label="FPS"      value={metrics.fps}           unit=" fps" color="#60a5fa"   pct={fpsP} offline={!cameraConnected} />
-          <Row icon={<Cpu      size={14}/>} label="CPU"      value={metrics.cpuUsage}       unit="%"    color="#a78bfa"  pct={cpuP} offline={!cameraConnected} />
+          <Row icon={<Clock    size={14}/>} label="Uptime"   value={Math.floor(metrics.uptime / (metrics.fps || 30))} unit="s" color="#a78bfa"  pct={Math.min(100, (metrics.uptime / 3600) * 100)} offline={!cameraConnected} />
           <Row icon={<Clock    size={14}/>} label="Latency"  value={metrics.latency}        unit="ms"   color="#3dd68c"   pct={latP} offline={!cameraConnected} />
           <Row icon={<Target   size={14}/>} label="Accuracy" value={Math.round(accP)}     unit="%"    color="#f5a623"   pct={accP} offline={!cameraConnected} />
         </div>

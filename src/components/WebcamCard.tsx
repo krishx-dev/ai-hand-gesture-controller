@@ -29,7 +29,7 @@ interface Props {
   gestureColor:      string;
   cameraConnected:   boolean;
   onWebcamReady:     (ready: boolean) => void;
-  onGestureDetected: (gesture: GestureType, confidence: number, landmarks: Landmark[]) => void;
+  onGestureDetected: (gesture: GestureType, confidence: number, landmarks: Landmark[], latency: number) => void;
 }
 
 // ── CDN loader (singleton) ────────────────────────────────────────
@@ -215,17 +215,18 @@ export const WebcamCard: React.FC<Props> = ({
       // 1. gesture toggle changes (enabledGestures) are always reflected
       // 2. the camera does NOT need to restart when a prop changes
       hands.onResults((results: MediaPipeResults) => {
+        const latency = (window as any)._lastMpLatency || 0;
         if (results.multiHandLandmarks?.length) {
           const raw = results.multiHandLandmarks[0];
           const lms: Landmark[] = raw.map(p => ({ x: p.x, y: p.y, z: p.z }));
           lmsRef.current = lms;
           setHasHand(true);
           const { gesture, confidence } = classifyLandmarks(lms, settingsRef.current);
-          onGestureDetectedRef.current(gesture, confidence, lms);
+          onGestureDetectedRef.current(gesture, confidence, lms, latency);
         } else {
           lmsRef.current = [];
           setHasHand(false);
-          onGestureDetectedRef.current('none', 0, []);
+          onGestureDetectedRef.current('none', 0, [], latency);
         }
       });
       handsRef.current = hands;
@@ -233,8 +234,13 @@ export const WebcamCard: React.FC<Props> = ({
       if (window.Camera) {
         const mc = new window.Camera(videoRef.current!, {
           onFrame: async () => {
-            if (handsRef.current && videoRef.current)
+            if (handsRef.current && videoRef.current) {
+              const start = performance.now();
               await handsRef.current.send({ image: videoRef.current });
+              const latency = Math.round(performance.now() - start);
+              // Store latency for next gesture detected callback
+              (window as any)._lastMpLatency = latency;
+            }
           },
           width: 640, height: 480,
         });
@@ -242,8 +248,12 @@ export const WebcamCard: React.FC<Props> = ({
       } else {
         const loop = async () => {
           const v = videoRef.current;
-          if (handsRef.current && v && v.readyState >= 2)
+          if (handsRef.current && v && v.readyState >= 2) {
+            const start = performance.now();
             await handsRef.current.send({ image: v });
+            const latency = Math.round(performance.now() - start);
+            (window as any)._lastMpLatency = latency;
+          }
           rafRef.current = requestAnimationFrame(loop as unknown as FrameRequestCallback);
         };
         loop();

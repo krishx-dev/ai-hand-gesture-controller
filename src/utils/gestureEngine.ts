@@ -247,6 +247,12 @@ const MIDDLE_MCP  = 9; const MIDDLE_PIP = 10;                  const MIDDLE_TIP 
 const RING_MCP    = 13; const RING_PIP  = 14;                  const RING_TIP  = 16;
 const PINKY_MCP   = 17; const PINKY_PIP = 18;                  const PINKY_TIP = 20;
 
+// ─── Helper: dist between two landmarks ──────────────────────
+function dist2D(a: Landmark, b: Landmark): number {
+  if (!a || !b) return 0;
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
 // ─── Helper: is a finger extended? ──────────────────────────
 function isFingerExtended(
   lms: Landmark[],
@@ -261,11 +267,8 @@ function isFingerExtended(
   const mcpLm = lms[mcp];
   if (!wrist || !tipLm || !pipLm || !mcpLm) return false;
 
-  const dist = (a: Landmark, b: Landmark) =>
-    Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-
-  const tipDist = dist(tipLm, wrist);
-  const pipDist = dist(pipLm, wrist);
+  const tipDist = dist2D(tipLm, wrist);
+  const pipDist = dist2D(pipLm, wrist);
 
   // Tip must be clearly further from wrist than PIP
   return tipDist > pipDist * 1.1;
@@ -281,11 +284,8 @@ function isThumbExtended(lms: Landmark[]): boolean {
   const indexMcp = lms[INDEX_MCP];
   if (!tip || !ip || !mcp || !cmc || !wrist || !indexMcp) return false;
 
-  const dist = (a: Landmark, b: Landmark) =>
-    Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-
   // Thumb extended = tip is far from index MCP
-  return dist(tip, indexMcp) > dist(mcp, indexMcp) * 1.1;
+  return dist2D(tip, indexMcp) > dist2D(mcp, indexMcp) * 1.1;
 }
 
 // ─── Helper: thumb pointing up? ──────────────────────────────
@@ -306,10 +306,6 @@ function isThumbDown(lms: Landmark[]): boolean {
   return tip.y > mcp.y && tip.y > wrist.y;
 }
 
-// ─── Helper: dist between two landmarks ──────────────────────
-function dist2D(a: Landmark, b: Landmark): number {
-  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-}
 
 // ─── Real Gesture Classifier ─────────────────────────────────
 export function classifyLandmarks(
